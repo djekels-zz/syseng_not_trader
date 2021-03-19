@@ -16,17 +16,6 @@ import argparse
 # Running script name
 running_script = sys.argv[0]
 
-#comment_pattern = re.compile(r'\s*#.*$')
-
-
-##def skip_comments(lines):
-##    global comment_pattern
-
-##    for line in lines:
-##        line = re.sub(comment_pattern, '', line).strip()
-##        if line:
-##            yield line
-
 def get_args():
     myargs = argparse.ArgumentParser(prog=sys.argv[0], \
                                      usage='Example: %(prog)s -t TeamMap.csv -p ProductMaster.csv -s Sales.csv --team-report=TeamReport.csv --product-report=ProductReport.csv', \
@@ -86,25 +75,16 @@ def main():
                 ProdID_Rev = 0
                 new_gross_revenue = 0
                 (SalesID, ProductID, TeamID, Quantity, Discount) = line2.split(',')
-
                 discount = Discount.rstrip()
-
                 ProdID_Rev_Line = float(ProductMasterMap[int(ProductID)]['price']) * int(ProductMasterMap[int(ProductID)]['lotsize'])*int(Quantity)
-                
-
                 DiscountCost = ProdID_Rev_Line * float(discount) / 100
-
                 SalesMap[int(SalesID)] = {'producid' : ProductID, 'teamid' : TeamID, 'quantity' : int(Quantity), 'total_sale' : ProdID_Rev_Line, 'discount' : Discount.rstrip()}
-
+                TeamRevenue[int(TeamID)] = TeamRevenue.get(TeamMap[int(TeamID)],0) + SalesMap[int(SalesID)]['total_sale']
                 ProductReport[int(ProductID)] = {'grossrevenue': ProdID_Rev_Line, 'totalunits': Quantity, 'discountcost': DiscountCost}
-                
 
     else:
         print('Oh well ; No args, no file, Should not be here')
   
-
-    print(ProductReport)
-
 
     #########################
     # Generate Reports
@@ -129,9 +109,6 @@ def main():
         product_rpt.write("Name, GrossRevenue, TotalUnits, DiscountCost")
         product_rpt.write('\n')
 
-        #for key, val in sorted(ProductMasterMap.items(), key=lambda item: item[1]):
-        #    print(key, val)
-
         for key, value in sorted(ProductReport.items(), key=lambda item: item[1]):
 
             product_rpt.write(str(ProductMasterMap[key]['name']))
@@ -144,8 +121,7 @@ def main():
 
             product_rpt.write('\n')
 
-        #product_rpt.close()
-
+        product_rpt.close()
 
 if __name__ == "__main__":
     main()
